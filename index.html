@@ -135,7 +135,7 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
     return f=>{ subs.push(f); run(); if(!timer){ timer=setInterval(run, 12000);
       try{ sb.channel("ch-"+table).on("postgres_changes",{event:"*",schema:"public",table},run).subscribe(); }catch(e){} }
       return ()=>{}; }; }
-  const votosLive = sb && live("votos", async()=>{ const {data,error}=await sb.from("votos").select("id,nombre,favs"); if(error) throw error; return snapDocs(data); });
+  const votosLive = sb && live("votos", async()=>{ const {data,error}=await sb.from("votos").select("id,nombre,favs"); if(error) throw error; return snapDocs(data.filter(r=>r.id!=="test-claude")); });
   const quitLive = sb && live("quitadas", async()=>{ const {data,error}=await sb.from("quitadas").select("ids").eq("id","lista").maybeSingle(); if(error) throw error; return {exists:!!data, data:()=>data?{ids:data.ids||[]}:undefined}; });
   const db = sb && {
     collection: p => ({ onSnapshot: (f)=> votosLive(f) }),
