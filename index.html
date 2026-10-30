@@ -153,6 +153,7 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
   window.adminLogin = async p => { if(!sb) return false; const {data}=await sb.rpc("es_admin",{p}); if(data===true){ ls.set("viaje-admin-pin",p); return true } return false; };
   window.adminLogout = () => { ls.set("viaje-admin-pin",""); location.reload(); };
   window.dbConfigured = !!sb;
+  window.setIdentity = id => { ls.set("viaje-id", id); location.reload(); };
 })();
 
 </script>
@@ -202,6 +203,7 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
       <li>Mira las casas y dale <b>♥</b> a todas las que te gusten.</li>
       <li>En <b>Favoritos del grupo</b> se juntan los ♥ de todos y salen ordenadas por votos, para comparar y decidir.</li>
     </ol>
+    <div id="wKnown" hidden><p><b>¿Ya te habías apuntado?</b> Toca tu nombre:</p><div class="people" id="wKnownList" style="margin-top:8px"></div><p style="margin-top:10px">Si eres nuevo, escribe tu nombre:</p></div>
     <form id="wForm" class="reg"><input id="wName" maxlength="30" placeholder="Tu nombre" aria-label="Tu nombre" required autocomplete="given-name"><button class="btn" type="submit">Empezar</button></form>
     <p class="wErr" id="wErr" hidden></p>
   </div>
@@ -504,13 +506,14 @@ let zone="Todas";
 let view="all";
 let votesReady=false;let VOTES={};let ME=null;let DB=null;let USER=null;let canWrite=true;let busy=false;
 const myDoc=()=>ME&&VOTES[ME];
-function votersOf(id){return Object.entries(VOTES).filter(([u,v])=>Array.isArray(v.favs)&&v.favs.includes(id)).map(([u,v])=>v.nombre||"Alguien")}
+function votersOf(id){return [...new Set(Object.entries(VOTES).filter(([u,v])=>Array.isArray(v.favs)&&v.favs.includes(id)).map(([u,v])=>(v.nombre||"Alguien").trim()))]}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function showWelcome(){const w=document.getElementById("welcome");if(!w.hidden)return;w.hidden=false;setTimeout(()=>{try{document.getElementById("wName").focus()}catch(e){}},50)}
+function fillKnown(){const best={};Object.entries(VOTES).forEach(([id,v])=>{if(!v.nombre)return;const k=v.nombre.trim().toLowerCase();if(!best[k]||(v.favs||[]).length>(best[k].v.favs||[]).length)best[k]={id,v}});const list=Object.values(best);const box=document.getElementById("wKnown");box.hidden=!list.length;document.getElementById("wKnownList").innerHTML=list.map(o=>`<button type="button" class="person" style="border:0;cursor:pointer;font-size:15px;padding:8px 14px" data-uid="${esc(o.id)}">${esc(o.v.nombre)}</button>`).join("");box.querySelectorAll("[data-uid]").forEach(b=>b.onclick=()=>window.setIdentity&&window.setIdentity(b.dataset.uid))}
+function showWelcome(){const w=document.getElementById("welcome");try{fillKnown()}catch(e){}if(!w.hidden)return;w.hidden=false;setTimeout(()=>{try{document.getElementById("wName").focus()}catch(e){}},50)}
 function renderGroup(){
   if(DB&&canWrite&&ME&&votesReady&&!myDoc())showWelcome();
   const box=document.getElementById("regBox"),pp=document.getElementById("people");
-  const names=Object.values(VOTES).map(v=>v.nombre).filter(Boolean);
+  const names=[...new Set(Object.values(VOTES).map(v=>(v.nombre||"").trim()).filter(Boolean))];
   pp.innerHTML=names.length?names.map(n=>`<span class="person">${esc(n)}</span>`).join(""):"";
   const totalFav=D.filter(r=>!hidden(r[10])&&votersOf(r[10]).length).length;
   document.getElementById("vFav").textContent=`♥ Favoritos del grupo (${totalFav})`;
