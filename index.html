@@ -133,15 +133,14 @@ body{font-size:15.5px}
 header{
   position:relative;margin:0 -16px;padding:34px 20px 54px;color:#fff;
   background:
-    linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px) 0 0/22px 22px,
-    linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px) 0 0/22px 22px,
-    radial-gradient(120% 90% at 80% 0%,var(--pool2),var(--pool));
+    radial-gradient(60% 50% at 85% 10%,rgba(255,255,255,.22),transparent 70%),
+    radial-gradient(50% 40% at 10% 90%,rgba(120,220,255,.25),transparent 70%),
+    linear-gradient(160deg,var(--pool2),var(--pool));
   overflow:hidden;
 }
-header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:22px;
-  background:var(--bg);
-  -webkit-mask:radial-gradient(14px 12px at 50% 0,transparent 98%,#000) 0 0/36px 22px repeat-x;
-          mask:radial-gradient(14px 12px at 50% 0,transparent 98%,#000) 0 0/36px 22px repeat-x}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:28px;background:var(--bg);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20 C150 0 250 40 400 20 C550 0 650 40 800 20 L800 40 L0 40Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20 C150 0 250 40 400 20 C550 0 650 40 800 20 L800 40 L0 40Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat}
 header h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,11vw,64px);line-height:.95;letter-spacing:-.02em;margin:0;max-width:10ch}
 .facts{margin:18px 0 0;gap:8px}
 .fact{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:999px;padding:7px 14px;font-size:14px;backdrop-filter:blur(4px)}
