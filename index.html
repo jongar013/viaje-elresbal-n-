@@ -208,8 +208,6 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
 </div>
 <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="undo">Deshacer</button></div>
 <section class="method">
-  <h2>Sobre los precios</h2>
-  <p>Son el total de las 6 noches para los 13, con impuestos, buscados el 30 de octubre de 2026; pueden cambiar. Los que llevan “≈” y “aprox.” son el precio “desde” de la web multiplicado por 13 personas y 6 noches: en agosto pueden salir algo más caros, y el precio real se lo pides al dueño. Solo Jon puede eliminar casas: las que elimina desaparecen para todo el grupo.</p>
   <p><a href="#" id="adminLink" style="color:var(--muted)">Acceso administrador</a></p>
   <form id="adminForm" class="reg" hidden><input id="adminPin" type="password" placeholder="PIN de administrador" aria-label="PIN de administrador"><button class="btn" type="submit">Entrar</button></form>
 </section>
@@ -526,7 +524,7 @@ function renderGroup(){
     document.getElementById("regForm").onsubmit=async ev=>{ev.preventDefault();const n=document.getElementById("regName").value.trim().slice(0,30);if(!n)return;
       try{await DB.doc("votos/"+ME).set({nombre:n,favs:(m&&m.favs)||[]});VOTES[ME]={nombre:n,favs:(m&&m.favs)||[]};box.dataset.editing="0";renderGroup();render()}catch(e){if(e&&e.code==="invalid_argument"){canWrite=false;renderGroup()}else alert2("No se ha podido guardar. Inténtalo otra vez.")}};
   }else{
-    const n=(m.favs||[]).length;
+    const n=(m.favs||[]).filter(i=>D.some(r=>r[10]===i&&!hidden(i))).length;
     box.innerHTML=`<p>Hola, <b style="color:var(--ink)">${esc(m.nombre)}</b>. Llevas ${n} ${n===1?"casa":"casas"} en favoritos: pulsa ♥ en las que te gusten.</p><div class="reg"><button class="btn ghost" type="button" id="editName">Cambiar nombre</button><button class="btn" type="button" id="goFav">Ver favoritos del grupo</button></div>`;
     document.getElementById("editName").onclick=()=>{box.dataset.editing="1";renderGroup()};
     document.getElementById("goFav").onclick=()=>setView("fav");
@@ -606,7 +604,7 @@ function render(){
   let rows=D.filter(r=>!hidden(r[10])&&(zone==="Todas"||r[0]===zone));
   const pv=r=>r[5]===3?1e9:(r[4]??9e8);
   rows.sort(so==="asc"?(a,b)=>pv(a)-pv(b):so==="fav"?(a,b)=>votersOf(b[10]).length-votersOf(a[10]).length||pv(a)-pv(b):(a,b)=>{const A=a[4]&&a[5]!==3?a[4]:-1,B=b[4]&&b[5]!==3?b[4]:-1;return B-A});
-  document.getElementById("count").textContent=`${rows.length} resultados`+(SHARED.size?` · ${SHARED.size} eliminadas por Jon`:"");const rb=document.getElementById("restore");rb.hidden=true;rb.textContent=`Volver a ver las que ocultaste (${gone.size})`;
+  document.getElementById("count").textContent=`${rows.length} resultados`;const rb=document.getElementById("restore");rb.hidden=true;rb.textContent=`Volver a ver las que ocultaste (${gone.size})`;
   const L=document.getElementById("list");
   if(!rows.length){L.innerHTML='<div class="empty">Nada con estos filtros. Prueba a quitar el precio máximo.</div>';return}
   L.innerHTML=rows.map(r=>card(r)).join("");
