@@ -180,15 +180,12 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
   </div>
   <div class="chips" id="zones" role="group" aria-label="Zona"></div>
   <div class="row">
-    <select id="sort" aria-label="Ordenar por precio">
+    <select id="sort" aria-label="Ordenar">
       <option value="asc">Precio más bajo primero</option>
       <option value="desc">Precio más alto primero</option>
+      <option value="fav">Más votadas primero</option>
     </select>
     <button class="restore" id="restore" type="button" hidden>Recuperar eliminados</button>
-  </div>
-  <div class="checks">
-    <label class="check" for="pool"><input type="checkbox" id="pool"> Con piscina</label>
-    <label class="check" for="park"><input type="checkbox" id="park"> Con aparcamiento</label>
   </div>
   <div class="count" id="count"></div>
 </div>
@@ -212,7 +209,7 @@ const SUPABASE_KEY = "sb_publishable_hVlnwk36vbl7goM1t-2Hog_H0IL6eU3"; // la cla
 <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="undo">Deshacer</button></div>
 <section class="method">
   <h2>Sobre los precios</h2>
-  <p>Son el total de las 6 noches para los 13, con impuestos, buscados el 30 de octubre de 2026; pueden cambiar. Los que llevan “≈” y “aprox.” son el precio “desde” de la web multiplicado por 13 personas y 6 noches: en agosto pueden salir algo más caros, y el precio real se lo pides al dueño. Piscina y aparcamiento salen de lo que pone cada anuncio. Solo Jon puede eliminar casas: las que elimina desaparecen para todo el grupo.</p>
+  <p>Son el total de las 6 noches para los 13, con impuestos, buscados el 30 de octubre de 2026; pueden cambiar. Los que llevan “≈” y “aprox.” son el precio “desde” de la web multiplicado por 13 personas y 6 noches: en agosto pueden salir algo más caros, y el precio real se lo pides al dueño. Solo Jon puede eliminar casas: las que elimina desaparecen para todo el grupo.</p>
   <p><a href="#" id="adminLink" style="color:var(--muted)">Acceso administrador</a></p>
   <form id="adminForm" class="reg" hidden><input id="adminPin" type="password" placeholder="PIN de administrador" aria-label="PIN de administrador"><button class="btn" type="submit">Entrar</button></form>
 </section>
@@ -597,27 +594,25 @@ function card(r,rank){
       <div class="ph">${im?`<img src="${im}" alt="Foto de ${n}" loading="lazy" decoding="async">`:`<div class="noph">Sin foto · ábrela con “Ver”</div>`}${rank?`<span class="rank">#${rank}</span>`:""}${OWNER?`<button class="del" type="button" data-id="${id}" aria-label="Eliminar ${n}">✕ Eliminar</button>`:""}</div>
       <div class="body">
       <div class="top"><div><p class="name">${n}</p><div class="place">${pl} · ${z}</div></div><div class="price">${price}</div></div>
-      <div class="meta">${mt[1]===1?'<span class="am">Piscina</span>':""}${mt[2]===1?'<span class="am">Aparcamiento</span>':""}<span class="site">${siteName(r)}</span>${rt&&rt!=="—"?`<span>★ ${rt}</span>`:""}</div>
-      ${r[11]?`<div class="fechas">Disponible: <b>${r[11]}</b></div>`:""}${nt?`<div class="note">${nt}</div>`:""}
+      ${r[11]?`<div class="fechas">Disponible: <b>${r[11]}</b></div>`:""}
       ${votersLine(id)}
-      <div class="foot"><span class="cap">${cap}</span><span class="right">${favBtn(id)}<a class="go" href="${link(r)}" target="_blank" rel="noopener">Ver</a></span></div>
+      <div class="foot"><span></span><span class="right">${favBtn(id)}<a class="go" href="${link(r)}" target="_blank" rel="noopener">Ver</a></span></div>
       </div>
     </article>`}
 function render(){
   try{updateFacts()}catch(e){}
   if(view==="fav"){return renderFav()}
   const so=document.getElementById("sort").value;
-  const pool=document.getElementById("pool").checked,park=document.getElementById("park").checked;
-  let rows=D.filter(r=>!hidden(r[10])&&(!pool||META[r[10]][1]===1)&&(!park||META[r[10]][2]===1)&&(zone==="Todas"||r[0]===zone));
+  let rows=D.filter(r=>!hidden(r[10])&&(zone==="Todas"||r[0]===zone));
   const pv=r=>r[5]===3?1e9:(r[4]??9e8);
-  rows.sort(so==="asc"?(a,b)=>pv(a)-pv(b):(a,b)=>{const A=a[4]&&a[5]!==3?a[4]:-1,B=b[4]&&b[5]!==3?b[4]:-1;return B-A});
+  rows.sort(so==="asc"?(a,b)=>pv(a)-pv(b):so==="fav"?(a,b)=>votersOf(b[10]).length-votersOf(a[10]).length||pv(a)-pv(b):(a,b)=>{const A=a[4]&&a[5]!==3?a[4]:-1,B=b[4]&&b[5]!==3?b[4]:-1;return B-A});
   document.getElementById("count").textContent=`${rows.length} resultados`+(SHARED.size?` · ${SHARED.size} eliminadas por Jon`:"");const rb=document.getElementById("restore");rb.hidden=true;rb.textContent=`Volver a ver las que ocultaste (${gone.size})`;
   const L=document.getElementById("list");
   if(!rows.length){L.innerHTML='<div class="empty">Nada con estos filtros. Prueba a quitar el precio máximo.</div>';return}
   L.innerHTML=rows.map(r=>card(r)).join("");
   wire(L);
 }
-["sort","pool","park"].forEach(id=>document.getElementById(id).addEventListener("input",render));
+["sort"].forEach(id=>document.getElementById(id).addEventListener("input",render));
 render();
 </script>
 <script>
